@@ -1,0 +1,13 @@
+[package]
+name = "getmyid-sample"
+version = "0.1.0"
+edition = "2021"
+description = "Sample application demonstrating getmyid library usage"
+license = "MIT"
+
+[dependencies]
+# Use local path for development, switch to version for release
+getmyid = { path = "../getmyid", features = ["tokio"] }
+tokio = { version = "1.0", features = ["rt-multi-thread", "macros"] }
+clap = { version = "4.0", features = ["derive"] }
+serde_json = "1.0"
