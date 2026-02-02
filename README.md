@@ -43,19 +43,35 @@ Options:
 Identity retrieved successfully!
 
   Identity:   BILLING_PROD
-  Kanidm URL: https://auth.example.com/oauth2/billing
+  IDM URL:    https://auth.example.com/oauth2/billing
+  Config URL: https://config.example.com/api/billing
+  Token:      tok_billing_xxx
   Process:    getmyid-sample
   PID:        12345
   UID:        1001
   GID:        1001
 ```
 
+**Output Fields:**
+| Field | Description |
+|-------|-------------|
+| `Identity` | Application-level identity name from whoami rules |
+| `IDM URL` | Identity Management (Kanidm) OAuth2/OIDC endpoint |
+| `Config URL` | Application configuration endpoint URL |
+| `Token` | Pre-shared authentication token for API access |
+| `Process` | Process name of the client application |
+| `PID` | Process ID |
+| `UID` | User ID |
+| `GID` | Group ID |
+
 ### JSON Format
 
 ```json
 {
   "identity": "BILLING_PROD",
-  "kanidm_url": "https://auth.example.com/oauth2/billing",
+  "idm_url": "https://auth.example.com/oauth2/billing",
+  "config_url": "https://config.example.com/api/billing",
+  "token": "tok_billing_xxx",
   "pid": 12345,
   "uid": 1001,
   "gid": 1001,
