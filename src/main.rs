@@ -4,7 +4,7 @@
 //! identity of the current process.
 
 use clap::Parser;
-use getmyid::{AsyncClient, Client, GetMyIdError};
+use getmyid::{AsyncClient, Client, GetMyIdError, RunnerRequest};
 use std::path::PathBuf;
 use std::time::Duration;
 
@@ -28,6 +28,14 @@ struct Args {
     /// Output format (text or json)
     #[arg(short, long, default_value = "text")]
     format: OutputFormat,
+
+    /// Instance ID to send in runner context (for dynamic config routing)
+    #[arg(short, long)]
+    instance_id: Option<u64>,
+
+    /// Include current timestamp in runner context
+    #[arg(long)]
+    with_timestamp: bool,
 }
 
 #[derive(Debug, Clone, Copy, clap::ValueEnum)]
@@ -54,13 +62,32 @@ fn main() {
     }
 }
 
+fn build_runner_request(args: &Args) -> Option<RunnerRequest> {
+    if args.instance_id.is_none() && !args.with_timestamp {
+        return None;
+    }
+
+    let mut req = RunnerRequest::new();
+
+    if let Some(id) = args.instance_id {
+        req = req.with_instance_id(id);
+    }
+
+    if args.with_timestamp {
+        req = req.with_current_timestamp();
+    }
+
+    Some(req)
+}
+
 fn run_sync(args: &Args) -> Result<(), GetMyIdError> {
     let client = Client::builder()
         .socket_path(&args.socket)
         .timeout(Duration::from_secs(args.timeout))
         .build();
 
-    let identity = client.get_identity()?;
+    let runner_req = build_runner_request(args);
+    let identity = client.get_identity_with_runner(runner_req)?;
 
     match args.format {
         OutputFormat::Text => {
@@ -70,10 +97,19 @@ fn run_sync(args: &Args) -> Result<(), GetMyIdError> {
             println!("  IDM URL:    {}", identity.idm_url);
             println!("  Config URL: {}", identity.config_url);
             println!("  Token:      {}", identity.token);
-            println!("  Process:    {}", identity.process);
-            println!("  PID:        {}", identity.pid);
-            println!("  UID:        {}", identity.uid);
-            println!("  GID:        {}", identity.gid);
+            println!();
+            println!("  Runner:");
+            println!("    Hostname:    {}", identity.runner.hostname);
+            println!("    Process:     {}", identity.runner.process);
+            println!("    PID:         {}", identity.runner.pid);
+            println!("    UID:         {}", identity.runner.uid);
+            println!("    GID:         {}", identity.runner.gid);
+            if let Some(instance_id) = identity.runner.instance_id {
+                println!("    Instance ID: {}", instance_id);
+            }
+            if let Some(timestamp) = identity.runner.timestamp {
+                println!("    Timestamp:   {}", timestamp);
+            }
         }
         OutputFormat::Json => {
             println!(
@@ -93,7 +129,8 @@ async fn run_async(args: &Args) -> Result<(), GetMyIdError> {
         .timeout(Duration::from_secs(args.timeout))
         .build();
 
-    let identity = client.get_identity().await?;
+    let runner_req = build_runner_request(args);
+    let identity = client.get_identity_with_runner(runner_req).await?;
 
     match args.format {
         OutputFormat::Text => {
@@ -103,10 +140,19 @@ async fn run_async(args: &Args) -> Result<(), GetMyIdError> {
             println!("  IDM URL:    {}", identity.idm_url);
             println!("  Config URL: {}", identity.config_url);
             println!("  Token:      {}", identity.token);
-            println!("  Process:    {}", identity.process);
-            println!("  PID:        {}", identity.pid);
-            println!("  UID:        {}", identity.uid);
-            println!("  GID:        {}", identity.gid);
+            println!();
+            println!("  Runner:");
+            println!("    Hostname:    {}", identity.runner.hostname);
+            println!("    Process:     {}", identity.runner.process);
+            println!("    PID:         {}", identity.runner.pid);
+            println!("    UID:         {}", identity.runner.uid);
+            println!("    GID:         {}", identity.runner.gid);
+            if let Some(instance_id) = identity.runner.instance_id {
+                println!("    Instance ID: {}", instance_id);
+            }
+            if let Some(timestamp) = identity.runner.timestamp {
+                println!("    Timestamp:   {}", timestamp);
+            }
         }
         OutputFormat::Json => {
             println!(
