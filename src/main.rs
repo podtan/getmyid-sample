@@ -69,6 +69,7 @@ fn run_sync(args: &Args) -> Result<(), GetMyIdError> {
             println!("  Identity:   {}", identity.identity);
             println!("  IDM URL:    {}", identity.idm_url);
             println!("  Config URL: {}", identity.config_url);
+            println!("  Token:      {}", identity.token);
             println!("  Process:    {}", identity.process);
             println!("  PID:        {}", identity.pid);
             println!("  UID:        {}", identity.uid);
@@ -101,6 +102,7 @@ async fn run_async(args: &Args) -> Result<(), GetMyIdError> {
             println!("  Identity:   {}", identity.identity);
             println!("  IDM URL:    {}", identity.idm_url);
             println!("  Config URL: {}", identity.config_url);
+            println!("  Token:      {}", identity.token);
             println!("  Process:    {}", identity.process);
             println!("  PID:        {}", identity.pid);
             println!("  UID:        {}", identity.uid);
